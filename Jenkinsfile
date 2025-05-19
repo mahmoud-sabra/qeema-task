@@ -1,4 +1,4 @@
-pipeline {
+edit pipeline {
     agent any
 
     environment {
@@ -73,6 +73,14 @@ pipeline {
                     docker push ${DOCKER_IMAGE}:latest
                     """
                 }
+            }
+        }
+
+        // Added stage to print current branch
+        stage('Print Current Branch') {
+            steps {
+                echo "Current branch: ${env.BRANCH_NAME}"
+                sh 'echo "Current branch in shell: $BRANCH_NAME"'
             }
         }
     }
