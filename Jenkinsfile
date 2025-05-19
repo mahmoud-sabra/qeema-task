@@ -7,7 +7,6 @@ pipeline {
         IMAGE_TAG = "v${BUILD_NUMBER}"
     }
 
-
     stages {
         stage('Checkout') {
             when {
@@ -76,11 +75,15 @@ pipeline {
             }
         }
 
-        // Added stage to print current branch
+        // Fixed stage to print current branch
         stage('Print Current Branch') {
             steps {
-                echo "Current branch: ${env.BRANCH_NAME}"
-                sh 'echo "Current branch in shell: $BRANCH_NAME"'
+                script {
+                    def branchName = sh(script: "git rev-parse --abbrev-ref HEAD", returnStdout: true).trim()
+                    echo "Current branch from git command: ${branchName}"
+                }
+                // Also print in shell for visibility
+                sh 'git rev-parse --abbrev-ref HEAD'
             }
         }
     }
