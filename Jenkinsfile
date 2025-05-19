@@ -7,10 +7,6 @@ pipeline {
         IMAGE_TAG = "v${BUILD_NUMBER}"
     }
 
-    tools {
-        maven 'Maven 3.8.1'  // Defined in Jenkins Global Tools
-    }
-
 
     stages {
         stage('Checkout') {
