@@ -124,8 +124,10 @@ pipeline {
             }
         }
         aborted {
-            echo "🛑 Pipeline was aborted - Not a tag build"
-            currentBuild.description = "Aborted - Not a tag build"
+            script {
+                echo "🛑 Pipeline was aborted - Not a tag build"
+                currentBuild.description = "Aborted - Not a tag build"
+            }
         }
     }
 }
