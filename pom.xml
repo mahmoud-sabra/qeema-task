@@ -22,6 +22,8 @@
 
     <properties>
         <java.version>11</java.version>
+        <!-- Explicitly set sonar.tests to empty to avoid SonarQube warnings -->
+        <sonar.tests></sonar.tests>
     </properties>
 
     <dependencies>
@@ -36,12 +38,6 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
-            </plugin>
-            <!-- SonarQube Maven Plugin -->
-            <plugin>
-                <groupId>org.sonarsource.scanner.maven</groupId>
-                <artifactId>sonar-maven-plugin</artifactId>
-                <version>4.0.0.4121</version>
             </plugin>
         </plugins>
     </build>
