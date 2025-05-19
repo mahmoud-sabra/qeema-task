@@ -4,7 +4,7 @@ pipeline {
     environment {
         SONARQUBE_ENV = 'sonarqube'
         DOCKER_IMAGE = 'ma7moudsabra/qeema'
-        // IMAGE_TAG will be set after checkout stage
+        // IMAGE_TAG will be set dynamically
     }
     
     stages {
@@ -12,16 +12,18 @@ pipeline {
             steps {
                 checkout scm
                 script {
-                    // Get the exact Git tag for the current commit; fallback to 'latest' if no tag
+                    // Detect Git tag on this commit
                     env.GIT_TAG = sh(
                         script: "git describe --tags --exact-match || echo ''",
                         returnStdout: true
                     ).trim()
+                    
                     if (!env.GIT_TAG) {
-                        echo "No Git tag found on this commit, using 'latest' as image tag."
-                        env.IMAGE_TAG = 'latest'
+                        echo "❌ No Git tag found on this commit. Aborting pipeline."
+                        currentBuild.result = 'ABORTED'
+                        error("Aborting pipeline because no tag was found on the commit.")
                     } else {
-                        echo "Git tag found: ${env.GIT_TAG}"
+                        echo "✅ Git tag detected: ${env.GIT_TAG}"
                         env.IMAGE_TAG = env.GIT_TAG
                     }
                 }
@@ -56,7 +58,6 @@ pipeline {
                 withCredentials([usernamePassword(credentialsId: 'docker', usernameVariable: 'DOCKERHUB_USERNAME', passwordVariable: 'DOCKERHUB_PASSWORD')]) {
                     sh '''
                         echo "$DOCKERHUB_PASSWORD" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
-                        echo "Pushing Docker image: ${DOCKER_IMAGE}:${IMAGE_TAG}"
                         docker push ${DOCKER_IMAGE}:${IMAGE_TAG}
                     '''
                 }
@@ -67,11 +68,9 @@ pipeline {
             steps {
                 sh """
                     if [ \$(docker ps -q -f name=${DOCKER_IMAGE}_container) ]; then
-                        echo "Stopping existing container..."
                         docker stop ${DOCKER_IMAGE}_container
                         docker rm ${DOCKER_IMAGE}_container
                     fi
-                    echo "Running new container with image: ${DOCKER_IMAGE}:${IMAGE_TAG}"
                     docker run -d -p 8000:8000 --name ${DOCKER_IMAGE}_container ${DOCKER_IMAGE}:${IMAGE_TAG}
                 """
             }
