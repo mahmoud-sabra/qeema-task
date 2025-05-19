@@ -4,13 +4,16 @@ pipeline {
     environment {
         SONARQUBE_ENV = 'sonarqube'
         DOCKER_IMAGE = 'ma7moudsabra/qeema'
-        IMAGE_TAG = "v${BUILD_NUMBER}"
+        IMAGE_TAG = "${env.GIT_TAG ?: 'latest'}"
     }
 
     stages {
         stage('Checkout') {
             steps {
                 checkout scm
+                script {
+                    env.GIT_TAG = sh(script: "git describe --tags --exact-match || echo ''", returnStdout: true).trim()
+                }
             }
         }
 
@@ -32,20 +35,30 @@ pipeline {
             steps {
                 sh """
                 docker build -t ${DOCKER_IMAGE}:${IMAGE_TAG} .
-                docker tag ${DOCKER_IMAGE}:${IMAGE_TAG} ${DOCKER_IMAGE}:latest
                 """
             }
         }
 
         stage('Push Docker Image') {
             steps {
-                withCredentials([usernamePassword(credentialsId: 'Docker', usernameVariable: 'DOCKERHUB_USERNAME', passwordVariable: 'DOCKERHUB_PASSWORD')]) {
+                withCredentials([usernamePassword(credentialsId: 'docker', usernameVariable: 'DOCKERHUB_USERNAME', passwordVariable: 'DOCKERHUB_PASSWORD')]) {
                     sh '''
                     echo "$DOCKERHUB_PASSWORD" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
                     docker push ${DOCKER_IMAGE}:${IMAGE_TAG}
-                    docker push ${DOCKER_IMAGE}:latest
                     '''
                 }
+            }
+        }
+
+        stage('Run Docker Container') {
+            steps {
+                sh """
+                if [ \$(docker ps -q -f name=${DOCKER_IMAGE}_container) ]; then
+                    docker stop ${DOCKER_IMAGE}_container
+                    docker rm ${DOCKER_IMAGE}_container
+                fi
+                docker run -d -p 8000:8000 --name ${DOCKER_IMAGE}_container ${DOCKER_IMAGE}:${IMAGE_TAG}
+                """
             }
         }
     }
