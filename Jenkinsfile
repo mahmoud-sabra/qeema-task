@@ -2,8 +2,8 @@ pipeline {
     agent any
 
     environment {
-        SONARQUBE_ENV = 'sonarqube'               
-        DOCKER_IMAGE = 'ma7moudsabra/qeema'    
+        SONARQUBE_ENV = 'sonarqube'
+        DOCKER_IMAGE = 'ma7moudsabra/qeema'
         IMAGE_TAG = "v${BUILD_NUMBER}"
     }
 
@@ -39,12 +39,12 @@ pipeline {
 
         stage('Push Docker Image') {
             steps {
-                withCredentials([usernamePassword(credentialsId: 'Docker', usernameVariable: 'DOCKERHUB_USERNAME', passwordVariable: 'DOCKERHUB_PASSWORD')]) {
-                    sh """
+                withCredentials([usernamePassword(credentialsId: 'docker', usernameVariable: 'DOCKERHUB_USERNAME', passwordVariable: 'DOCKERHUB_PASSWORD')]) {
+                    sh '''
                     echo "$DOCKERHUB_PASSWORD" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
                     docker push ${DOCKER_IMAGE}:${IMAGE_TAG}
                     docker push ${DOCKER_IMAGE}:latest
-                    """
+                    '''
                 }
             }
         }
