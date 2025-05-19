@@ -9,7 +9,7 @@ Generate token from sonarqube
 # Install sonarqube scanner plugin in jenkins
 Add sonarqube token in jenkins credentials
 Add sonarQube server URL in configure system section
- Install sonar scanner
+# Install sonar scanner
 Configure <sonar-project.properties> and put it with app 
 ![image](https://github.com/user-attachments/assets/fbf751c7-26e9-4f5a-8c01-b32b50f04458)
 ![image](https://github.com/user-attachments/assets/432bdf93-b798-435e-9794-8a255bc2696f)
