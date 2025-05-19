@@ -9,27 +9,18 @@ pipeline {
 
     stages {
         stage('Checkout') {
-            when {
-                branch 'dev'
-            }
             steps {
                 checkout scm
             }
         }
 
         stage('Build JAR') {
-            when {
-                branch 'dev'
-            }
             steps {
                 sh 'mvn clean package -DskipTests'
             }
         }
 
         stage('SonarQube Scan') {
-            when {
-                branch 'dev'
-            }
             steps {
                 withSonarQubeEnv("${SONARQUBE_ENV}") {
                     sh 'mvn sonar:sonar'
@@ -38,9 +29,6 @@ pipeline {
         }
 
         stage('Wait for Quality Gate') {
-            when {
-                branch 'dev'
-            }
             steps {
                 timeout(time: 2, unit: 'MINUTES') {
                     waitForQualityGate abortPipeline: true
@@ -49,9 +37,6 @@ pipeline {
         }
 
         stage('Build Docker Image') {
-            when {
-                branch 'dev'
-            }
             steps {
                 sh """
                 docker build -t ${DOCKER_IMAGE}:${IMAGE_TAG} .
@@ -61,9 +46,6 @@ pipeline {
         }
 
         stage('Push Docker Image') {
-            when {
-                branch 'dev'
-            }
             steps {
                 withCredentials([usernamePassword(credentialsId: 'docker', usernameVariable: 'DOCKERHUB_USERNAME', passwordVariable: 'DOCKERHUB_PASSWORD')]) {
                     sh """
@@ -72,18 +54,6 @@ pipeline {
                     docker push ${DOCKER_IMAGE}:latest
                     """
                 }
-            }
-        }
-
-        // Fixed stage to print current branch
-        stage('Print Current Branch') {
-            steps {
-                script {
-                    def branchName = sh(script: "git rev-parse --abbrev-ref HEAD", returnStdout: true).trim()
-                    echo "Current branch from git command: ${branchName}"
-                }
-                // Also print in shell for visibility
-                sh 'git rev-parse --abbrev-ref HEAD'
             }
         }
     }
