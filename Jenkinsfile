@@ -1,4 +1,4 @@
-edit pipeline {
+pipeline {
     agent any
 
     environment {
