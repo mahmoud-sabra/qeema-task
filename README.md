@@ -6,7 +6,7 @@ https://pkg.jenkins.io/debian/
 # jenkins plugins
 {Pipeline, GIT, Maven Integration, SonarQube Scanner, Docker Pipeline,Credentials Binding}
 Generate token from sonarqube
-Install sonarqube scanner plugin in jenkins
+# Install sonarqube scanner plugin in jenkins
 Add sonarqube token in jenkins credentials
 Add sonarQube server URL in configure system section
  Install sonar scanner
