@@ -1,5 +1,4 @@
 pipeline {
-    
     agent any
     environment {
         SONARQUBE_ENV = 'sonarqube'
@@ -11,19 +10,7 @@ pipeline {
             steps {
                 checkout scm
                 script {
-                    // Get tags pointing at the current commit (HEAD)
-                    env.GIT_TAG = sh(script: "git tag --points-at HEAD", returnStdout: true).trim()
-                    
-                    // If multiple tags, use first one
-                    if (env.GIT_TAG.contains('\n')) {
-                        env.GIT_TAG = env.GIT_TAG.split('\n')[0]
-                    }
-                    
-                    echo "Detected Git tag: ${env.GIT_TAG ?: 'none'}"
-                    
-                    if (!env.GIT_TAG) {
-                        error("No tag found on this commit. Aborting build.")
-                    }
+                    env.GIT_TAG = sh(script: "git describe --tags --exact-match || echo ''", returnStdout: true).trim()
                 }
             }
         }
@@ -74,4 +61,3 @@ pipeline {
         }
     }
 }
-
