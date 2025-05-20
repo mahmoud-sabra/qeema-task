@@ -3,7 +3,7 @@ pipeline {
     environment {
         SONARQUBE_ENV = 'sonarqube'
         DOCKER_IMAGE = 'ma7moudsabra/qeema'
-        IMAGE_TAG = 'latest'
+        IMAGE_TAG = "${BUILD_NUMBER}"
     }
     stages {
         stage('Checkout') {
@@ -41,13 +41,16 @@ pipeline {
             }
         }
         stage('Run Docker Container') {
+            environment {
+                CONTAINER_NAME = "${DOCKER_IMAGE.replace('/', '')}container"
+            }
             steps {
                 sh """
-                if [ \$(docker ps -q -f name=${DOCKER_IMAGE}_container) ]; then
-                    docker stop ${DOCKER_IMAGE}_container
-                    docker rm ${DOCKER_IMAGE}_container
+                if [ \$(docker ps -q -f name=${CONTAINER_NAME}) ]; then
+                    docker stop ${CONTAINER_NAME}
+                    docker rm ${CONTAINER_NAME}
                 fi
-                docker run -d -p 8000:8000 --name ${DOCKER_IMAGE}_container ${DOCKER_IMAGE}:${IMAGE_TAG}
+                docker run -d -p 8000:8000 --name ${CONTAINER_NAME} ${DOCKER_IMAGE}:${IMAGE_TAG}
                 """
             }
         }
