@@ -1,5 +1,4 @@
 # qeema-task
-
 **Note: All pipeline operations will be managed on the `dev` branch.**
 
 **Note: I initially tried to configure the pipeline to trigger only on Git tag creation, but unfortunately, I was not successful. Therefore, I added an additional trigger for push events as a fallback.**
