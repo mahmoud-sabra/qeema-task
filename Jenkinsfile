@@ -30,16 +30,22 @@ pipeline {
                 """
             }
         }
-        stage('Push Docker Image') {
-            steps {
-                withCredentials([usernamePassword(credentialsId: 'Docker', usernameVariable: 'DOCKERHUB_USERNAME', passwordVariable: 'DOCKERHUB_PASSWORD')]) {
-                    sh '''
-                    echo "$DOCKERHUB_PASSWORD" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
-                    docker push ${DOCKER_IMAGE}:${IMAGE_TAG}
-                    '''
-                }
-            }
+       stage('Push Docker Image') {
+    steps {
+        withCredentials([usernamePassword(credentialsId: 'Docker', usernameVariable: 'DOCKERHUB_USERNAME', passwordVariable: 'DOCKERHUB_PASSWORD')]) {
+            sh '''
+            echo "$DOCKERHUB_PASSWORD" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
+            
+            echo "✅ Testing Docker Hub login..."
+            docker info | grep Username || true
+            docker pull hello-world
+            
+            echo "🚀 Pushing image..."
+            docker push ${DOCKER_IMAGE}:${IMAGE_TAG}
+            '''
         }
+    }
+}
         stage('Run Docker Container') {
             environment {
                 CONTAINER_NAME = "${DOCKER_IMAGE.replace('/', '')}container"
